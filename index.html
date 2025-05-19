@@ -3,18 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Analizador de Datos Estadísticos</title>
-  <link rel="stylesheet" href="style.css"/>
+  <title>Comparador de Grupos</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>📊 Analizador de Datos Estadísticos</h1>
-    <input type="file" id="fileInput" accept=".csv" />
+    <h1>🔍 Comparador de Grupos con Pruebas de Hipótesis</h1>
+    <input type="file" id="csvFile" accept=".csv" />
     <div id="output"></div>
-    <canvas id="chart" width="400" height="200"></canvas>
+    <canvas id="boxplotChart"></canvas>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@4.1.0/dist/chartjs-chart-box-and-violin-plot.umd.min.js"></script>
+
+  <script>
+    const { Chart, registerables } = window;
+    Chart.register(...registerables); // Registra los elementos por defecto de Chart.js
+
+    // Registra los componentes específicos del boxplot
+    Chart.register(
+      chartjsChartBoxAndViolinPlot.BoxPlotController,
+      chartjsChartBoxAndViolinPlot.BoxAndWhiskers,
+      chartjsChartBoxAndViolinPlot.BoxPlot,
+      chartjsChartBoxAndViolinPlot.LinearScale,
+      chartjsChartBoxAndViolinPlot.CategoryScale,
+      chartjsChartBoxAndViolinPlot.Tooltip
+    );
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
+
 
