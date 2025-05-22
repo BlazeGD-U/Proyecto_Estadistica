@@ -1,37 +1,148 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #f8f9fa;
+  font-family: 'Inter', Arial, sans-serif; /* Fuente Inter para una estética moderna */
+  background: #f0f2f5; /* Fondo más claro */
   margin: 0;
   padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Alinea al inicio para que el contenido fluya hacia abajo */
+  min-height: 100vh; /* Asegura que el cuerpo ocupe al menos toda la altura de la ventana */
 }
 
 .container {
-  max-width: 800px;
-  margin: auto;
+  max-width: 900px; /* Ancho máximo aumentado para acomodar mejor las gráficas */
+  width: 100%; /* Asegura que el contenedor sea responsivo */
+  margin: auto; /* Centra el contenedor */
   background: #fff;
   padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px #ccc;
+  border-radius: 12px; /* Esquinas más redondeadas */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra más suave y pronunciada */
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Espacio entre los elementos dentro del contenedor */
 }
 
 h1 {
   text-align: center;
   margin-bottom: 20px;
+  color: #333;
+  font-size: 2.2em;
+  font-weight: 700;
+}
+
+input[type="file"] {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Transición suave para efectos hover */
+  align-self: center; /* Centra el input de archivo */
+  width: fit-content; /* Ajusta el ancho al contenido */
+}
+
+input[type="file"]:hover {
+  background-color: #e9e9e9;
+  border-color: #bbb;
 }
 
 #output {
   margin-top: 20px;
+  padding: 15px;
+  background-color: #eef7ff; /* Fondo azul claro para la sección de resultados */
+  border: 1px solid #cce0ff;
+  border-radius: 8px;
+  color: #333;
+  line-height: 1.6;
 }
 
-#boxplotChart {
-  width: 100% !important;
-  max-width: 600px;
-  height: 350px !important;
+#output h3 {
+  color: #0056b3; /* Azul más oscuro para los títulos de sección */
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.charts-section {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Espacio entre los contenedores de gráficas */
+}
+
+.charts-section h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.8em;
+}
+
+.chart-wrapper {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* Sombra para las cajas de las gráficas */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra el contenido dentro del wrapper */
+}
+
+.chart-wrapper h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #555;
+  font-size: 1.4em;
+}
+
+canvas {
+  width: 100% !important; /* Asegura que el canvas ocupe todo el ancho disponible de su padre */
+  max-width: 700px; /* Ancho máximo para pantallas grandes */
+  height: 350px !important; /* Altura fija para consistencia visual */
   display: block;
-  margin: 30px auto 0 auto;
+  margin: 0 auto;
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 8px #eee;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
 }
+
+/* Ajustes responsivos para pantallas más pequeñas */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+    margin: 10px; /* Márgenes más pequeños en pantallas medianas */
+  }
+
+  h1 {
+    font-size: 1.8em;
+  }
+
+  .charts-section h2 {
+    font-size: 1.5em;
+  }
+
+  .chart-wrapper h3 {
+    font-size: 1.2em;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+
+  .container {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.5em;
+  }
+
+  input[type="file"] {
+    width: 100%; /* El input de archivo ocupa todo el ancho en pantallas pequeñas */
+  }
+}
+
+
+
 
 

@@ -12,7 +12,17 @@ function handleFile(event) {
 }
 
 function analizarDatos(data) {
-  const grupoKey = "Grupo";  // Hardcodea los nombres de las columnas
+  // Destruir todos los gráficos existentes antes de procesar nuevos datos
+  if (window.histChartA) {
+    window.histChartA.destroy();
+    window.histChartA = null;
+  }
+  if (window.histChartB) {
+    window.histChartB.destroy();
+    window.histChartB = null;
+  }
+
+  const grupoKey = "Grupo";
   const valorKey = "Resultado";
 
   if (!data[0] || !data[0][grupoKey] || !data[0][valorKey]) {
@@ -24,7 +34,7 @@ function analizarDatos(data) {
   data.forEach(row => {
     const grupo = row[grupoKey];
     const valor = row[valorKey];
-    if (!isNaN(Number(valor))) { // Convierte a número y verifica si es NaN
+    if (!isNaN(Number(valor))) {
       if (!grupos[grupo]) grupos[grupo] = [];
       grupos[grupo].push(Number(valor));
     }
@@ -49,7 +59,7 @@ function analizarDatos(data) {
     output.innerHTML += `<br><i>⚠️ ANOVA no implementado aún. Solo se muestra análisis descriptivo.</i>`;
   }
 
-  dibujarBoxplot(grupos);
+  dibujarHistogramas(grupos);
 }
 
 function pruebaT(arr1, arr2) {
@@ -61,87 +71,14 @@ function pruebaT(arr1, arr2) {
   const se = Math.sqrt((s1 ** 2 / n1) + (s2 ** 2 / n2));
   const t = (m1 - m2) / se;
   const df = Math.min(n1, n2) - 1;
-
-  // aproximación de p con función normal estándar
   const p = 2 * (1 - normalCDF(Math.abs(t)));
   return { t, p };
 }
 
-// Función de distribución normal acumulada (aproximada)
 function normalCDF(x) {
   return (1 - Math.exp(-x * x / 2)) / Math.sqrt(2 * Math.PI);
 }
 
-function dibujarBoxplot(grupos) {
-  const labels = Object.keys(grupos);
-  const data = labels.map(label => grupos[label]);
-
-  const ctx = document.getElementById('boxplotChart').getContext('2d');
-  if (window.myChart) window.myChart.destroy();
-  window.myChart = new Chart(ctx, {
-    type: 'boxplot',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Distribución por Grupo',
-        data: data,
-        backgroundColor: 'rgba(99, 132, 255, 0.5)',
-        borderColor: 'rgba(99, 132, 255, 1)',
-        borderWidth: 1,
-        outlierBackgroundColor: 'rgba(255,99,132,0.3)',
-        outlierBorderColor: 'rgba(255,99,132,1)',
-        outlierRadius: 3,
-        outlierBorderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: 'Boxplot por Grupo',
-          font: {
-            size: 16
-          }
-        },
-        legend: {
-          position: 'top',
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              const data = context.raw;
-              const stats = {
-                min: Math.min(...data),
-                q1: quantile(data, 0.25),
-                median: quantile(data, 0.5),
-                q3: quantile(data, 0.75),
-                max: Math.max(...data)
-              };
-              return [
-                `Mínimo: ${stats.min.toFixed(2)}`,
-                `Q1: ${stats.q1.toFixed(2)}`,
-                `Mediana: ${stats.median.toFixed(2)}`,
-                `Q3: ${stats.q3.toFixed(2)}`,
-                `Máximo: ${stats.max.toFixed(2)}`
-              ];
-            }
-          }
-        }
-      },
-      scales: {
-        y: {
-          title: {
-            display: true,
-            text: 'Valores'
-          }
-        }
-      }
-    }
-  });
-}
-
-// Función auxiliar para calcular cuantiles
 function quantile(arr, q) {
   const sorted = arr.slice().sort((a, b) => a - b);
   const pos = (sorted.length - 1) * q;
@@ -151,5 +88,121 @@ function quantile(arr, q) {
     return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
   } else {
     return sorted[base];
+  }
+}
+
+function calcularDatosHistograma(valores, numBins = 10) {
+  const min = Math.min(...valores);
+  const max = Math.max(...valores);
+  const range = max - min;
+  const binWidth = range / numBins;
+  const bins = Array(numBins).fill(0);
+  const labels = Array(numBins).fill(0).map((_, i) => (min + i * binWidth).toFixed(2));
+
+  valores.forEach(valor => {
+    const binIndex = Math.min(Math.floor((valor - min) / binWidth), numBins - 1);
+    bins[binIndex]++;
+  });
+
+  return { labels, frecuencias: bins };
+}
+
+function dibujarHistogramas(grupos) {
+  const [g1, g2] = Object.keys(grupos).slice(0, 2);
+
+  if (g1 && grupos[g1]) {
+    const { labels, frecuencias } = calcularDatosHistograma(grupos[g1]);
+    const ctxA = document.getElementById('histGroupA').getContext('2d');
+    window.histChartA = new Chart(ctxA, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: `Histograma ${g1}`,
+          data: frecuencias,
+          backgroundColor: 'rgba(99, 132, 255, 0.5)',
+          borderColor: 'rgba(99, 132, 255, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { // Compatible con Chart.js 3.x
+            display: true,
+            text: `Histograma ${g1}`,
+            font: { size: 14 }
+          },
+          legend: { // Compatible con Chart.js 3.x
+            position: 'top'
+          }
+        },
+        scales: {
+          x: { // Cambiado de xAxes a x
+            title: { // Cambiado de scaleLabel a title
+              display: true,
+              text: 'Valores'
+            }
+          },
+          y: { // Cambiado de yAxes a y
+            title: { // Cambiado de scaleLabel a title
+              display: true,
+              text: 'Frecuencia'
+            },
+            ticks: {
+              beginAtZero: true
+            }
+          }
+        }
+      }
+    });
+  }
+
+  if (g2 && grupos[g2]) {
+    const { labels, frecuencias } = calcularDatosHistograma(grupos[g2]);
+    const ctxB = document.getElementById('histGroupB').getContext('2d');
+    window.histChartB = new Chart(ctxB, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: `Histograma ${g2}`,
+          data: frecuencias,
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: `Histograma ${g2}`,
+            font: { size: 14 }
+          },
+          legend: {
+            position: 'top'
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Valores'
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Frecuencia'
+            },
+            ticks: {
+              beginAtZero: true
+            }
+          }
+        }
+      }
+    });
   }
 }
